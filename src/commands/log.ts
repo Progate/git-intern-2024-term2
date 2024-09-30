@@ -40,12 +40,10 @@ const parseCommit = (hash: string, content: string): Commit => {
   const lines = content.trim().split("\n");
   const commit: Partial<Commit> = { hash };
   
-  let messageStartIndex = -1;
-
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
     if (line === "") {
-      messageStartIndex = i + 1;
+      commit.message = lines.slice(i + 1).join("\n").trim();
       break;
     }
 
@@ -71,10 +69,6 @@ const parseCommit = (hash: string, content: string): Commit => {
         commit.committer = value;
         break;
     }
-  }
-
-  if (messageStartIndex !== -1) {
-    commit.message = lines.slice(messageStartIndex).join("\n").trim();
   }
 
   return commit as Commit;
