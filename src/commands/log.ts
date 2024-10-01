@@ -39,11 +39,14 @@ const getCommitContent = (hash: string): string => {
 const parseCommit = (hash: string, content: string): Commit => {
   const lines = content.trim().split("\n");
   const commit: Partial<Commit> = { hash };
-  
+
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
     if (line === "") {
-      commit.message = lines.slice(i + 1).join("\n").trim();
+      commit.message = lines
+        .slice(i + 1)
+        .join("\n")
+        .trim();
       break;
     }
 
