@@ -93,16 +93,7 @@ const getCommitHistory = (
   return getCommitHistory(commit.parent, currentHistory);
 };
 
-export const displayGitLog = (): void => {
-  const headHash = extractHeadHash();
-
-  if (!headHash) {
-    console.log("there is no commit.");
-    return;
-  }
-
-  const commitHistory = getCommitHistory(headHash);
-
+export const displayCommitHistory = (commitHistory: Array<Commit>): void => {
   commitHistory.forEach((commit) => {
     coloredLog({
       text: `commit: ${commit.hash}`,
@@ -112,4 +103,17 @@ export const displayGitLog = (): void => {
     console.log(`Committer: ${commit.committer}\n`);
     console.log(`  ${commit.message}\n`);
   });
+};
+
+export const log = (): void => {
+  const headHash = extractHeadHash();
+
+  if (!headHash) {
+    console.log("there is no commit.");
+    return;
+  }
+
+  const commitHistory = getCommitHistory(headHash);
+
+  displayCommitHistory(commitHistory);
 };

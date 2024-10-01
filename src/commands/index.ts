@@ -1,7 +1,7 @@
-import { displayGitLog } from "./log.js";
+import { log } from "./log.js";
 
 export const validCommand = {
-  log: displayGitLog,
+  log: log,
   help: () => {
     console.log("Available commands:");
     validCommandList.forEach((cmd) => {
