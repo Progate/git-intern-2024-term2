@@ -1,10 +1,9 @@
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "path";
 
-import { GIT_DIR, GIT_OBJECTS } from "../constants.js";
+import { GIT_DIR } from "../constants.js";
 import { coloredLog } from "../functions/colored-log.js";
-import { readFile } from "../functions/read-file.js";
-import { Commit } from "../interfaces/commit.js";
+import { Commit, CommitFieldType } from "../models/commit.js";
 
 const extractHeadHash = (): string | undefined => {
   const headPath = join(GIT_DIR, "HEAD");
@@ -27,64 +26,15 @@ const extractHeadHash = (): string | undefined => {
   }
 };
 
-const getCommitContent = (hash: string): string => {
-  const dirName = hash.slice(0, 2);
-  const fileName = hash.slice(2);
-
-  const path = join(GIT_OBJECTS, dirName, fileName);
-
-  return readFile(path);
-};
-
-const parseCommit = (hash: string, content: string): Commit => {
-  const lines = content.trim().split("\n");
-  const commit: Partial<Commit> = { hash };
-
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i];
-    if (line === "") {
-      commit.message = lines
-        .slice(i + 1)
-        .join("\n")
-        .trim();
-      break;
-    }
-
-    if (!line) {
-      break;
-    }
-
-    const [key, ...rest] = line.split(" ");
-    const value = rest.join(" ");
-
-    switch (key) {
-      //TODO: logとして表示しない情報も，持っておく．最終的に必要なければ消す．
-      case "tree":
-        commit.tree = value;
-        break;
-      case "parent":
-        commit.parent = value;
-        break;
-      case "author":
-        commit.author = value;
-        break;
-      case "committer":
-        commit.committer = value;
-        break;
-    }
-  }
-
-  return commit as Commit;
-};
-
 const getCommitHistory = (
   hash: string,
-  history: Array<Commit> = [],
-): Array<Commit> => {
-  const content = getCommitContent(hash);
-  const commit = parseCommit(hash, content);
+  history: Array<CommitFieldType> = [],
+): Array<CommitFieldType> => {
+  const commit = new Commit();
+  commit.setCommit(hash);
+  const commitData = commit.getCommit();
 
-  const currentHistory = [...history, commit];
+  const currentHistory = [...history, commitData];
 
   if (!commit.parent) {
     return currentHistory;
@@ -93,7 +43,9 @@ const getCommitHistory = (
   return getCommitHistory(commit.parent, currentHistory);
 };
 
-export const displayCommitHistory = (commitHistory: Array<Commit>): void => {
+export const displayCommitHistory = (
+  commitHistory: Array<CommitFieldType>,
+): void => {
   commitHistory.forEach((commit) => {
     coloredLog({
       text: `commit: ${commit.hash}`,
