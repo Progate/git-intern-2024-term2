@@ -22,5 +22,5 @@ export const mygit = async (argv: Array<string>): Promise<void> => {
   }
 
   // Avoid eslint error by adding some async operation.
-  await new Promise((resolve) => setTimeout(resolve, 1000));
+  await new Promise((resolve) => setTimeout(resolve, 1));
 };
