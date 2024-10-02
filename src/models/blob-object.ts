@@ -4,24 +4,11 @@ import { join } from "node:path";
 import { deflateSync } from "node:zlib";
 
 import { GIT_OBJECTS } from "../constants.js";
-import { coloredLog } from "../functions/colored-log.js";
 
 export class BlobObject {
-  content?: Buffer;
-
-  public setContent = (content: Buffer): void => {
-    this.content = content;
-  };
+  constructor(private readonly content: Buffer) {}
 
   public dumpBlobObject = (): void => {
-    if (!this.content) {
-      coloredLog({
-        text: "error in generating Blob object.",
-        color: "red",
-      });
-      return;
-    }
-
     const store = `blob ${this.content.length.toString()}\x00${this.content.toString()}`;
     //16進数表示のため，hexに変換
     const hash = createHash("sha1").update(store).digest("hex");
@@ -32,9 +19,10 @@ export class BlobObject {
       new Uint8Array(Buffer.from(store)),
     );
 
-    if (existsSync(dirPath)) return;
+    if (existsSync(filePath)) return;
 
-    mkdirSync(dirPath);
+    if (!existsSync(dirPath)) mkdirSync(dirPath);
+
     writeFileSync(filePath, new Uint8Array(compressedBlobObject));
   };
 }

@@ -18,7 +18,6 @@ export const add = (options: Array<string>): void => {
 
   const content = readFileSync(filePath);
 
-  const blobObject = new BlobObject();
-  blobObject.setContent(content);
+  const blobObject = new BlobObject(content);
   blobObject.dumpBlobObject();
 };
