@@ -57,7 +57,7 @@ export const displayCommitHistory = (
   });
 };
 
-export const log = (): void => {
+export const log = (_options?: Array<string>): void => {
   const headHash = extractHeadHash();
 
   if (!headHash) {

@@ -1,6 +1,8 @@
+import { add } from "./add.js";
 import { log } from "./log.js";
 
 export const validCommand = {
+  add: add,
   log: log,
   help: () => {
     console.log("Available commands:");
