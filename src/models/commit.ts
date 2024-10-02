@@ -1,7 +1,7 @@
 import { join } from "node:path";
 
 import { GIT_OBJECTS } from "../constants.js";
-import { readFile } from "../functions/read-file.js";
+import { readGitObject } from "../functions/read-git-object.js";
 
 export interface CommitFieldType {
   tree: string;
@@ -28,8 +28,8 @@ export class Commit {
     this.hash = "";
   }
 
-  public setCommit = (hash: string): void => {
-    const content = this.getCommitContent(hash);
+  public setCommit = async (hash: string): Promise<void> => {
+    const content = await this.getCommitContent(hash);
 
     this.parseCommit(hash, content);
   };
@@ -44,13 +44,13 @@ export class Commit {
     };
   };
 
-  private getCommitContent = (hash: string): string => {
+  private getCommitContent = async (hash: string): Promise<string> => {
     const dirName = hash.slice(0, 2);
     const fileName = hash.slice(2);
 
     const path = join(GIT_OBJECTS, dirName, fileName);
 
-    return readFile(path);
+    return await readGitObject(path);
   };
 
   private parseCommit = (hash: string, content: string): void => {

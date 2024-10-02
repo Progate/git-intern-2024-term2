@@ -1,9 +1,9 @@
-import { readFileSync } from "node:fs";
+import { readFile } from "node:fs/promises";
 
 import { coloredLog } from "../functions/colored-log.js";
 import { BlobObject } from "../models/blob-object.js";
 
-export const add = (options: Array<string>): void => {
+export const add = async (options: Array<string>): Promise<void> => {
   const filePath = options[0];
 
   //引数にファイルパスが含まれていなかった場合の処理
@@ -16,8 +16,8 @@ export const add = (options: Array<string>): void => {
     return;
   }
 
-  const content = readFileSync(filePath);
+  const content = await readFile(filePath);
 
   const blobObject = new BlobObject(content);
-  blobObject.dumpBlobObject();
+  await blobObject.dumpBlobObject();
 };
