@@ -40,7 +40,6 @@ export default [
         "warn",
         {
           argsIgnorePattern: "^_",
-          varsIgnorePattern: "^_",
         },
       ],
       "@typescript-eslint/array-type": [

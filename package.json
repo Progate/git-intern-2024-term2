@@ -13,6 +13,7 @@
     "lint:fix": "eslint --fix .",
     "format:check": "prettier --check .",
     "format:fix": "prettier --write .",
+    "check": "npm run format:fix && npm run lint:fix",
     "build": "tsc",
     "watch": "tsc --watch"
   },
