@@ -24,6 +24,7 @@ interface Entry {
 export class GitIndex {
   private entries: Array<Entry>;
   private readonly VERSION = 2;
+  private readonly SIGNATURE = 'DIRC'
 
   constructor(private readonly gitIndexPath: string) {
     this.entries = [];
@@ -61,7 +62,7 @@ export class GitIndex {
     this.entries.push(entry);
   };
 
-  public dumpIndex = async (): Promise<void> => {
+  public dumpIndex = async (): Promise<Array<string>> => {
     const headerBuffer = this.createHeaderBuffer();
     const entriesBuffer = this.createEntriesBuffer();
     const checkSumBuffer = this.createCheckSumBuffer(entriesBuffer);
@@ -72,7 +73,9 @@ export class GitIndex {
       Uint8Array.from(checkSumBuffer),
     ]);
 
-    await writeFile(GIT_INDEX, Uint8Array.from(indexBuffer));
+    await writeFile(this.gitIndexPath, Uint8Array.from(indexBuffer));
+
+    return this.entries.map(entry => entry.filePath)
   };
 
   private parseEntries = async (): Promise<void> => {
@@ -91,8 +94,8 @@ export class GitIndex {
   private createHeaderBuffer = (): Buffer => {
     const headerBuffer = Buffer.alloc(12);
     // https://www.w3schools.com/nodejs/met_buffer_write.asp
-    headerBuffer.write("DIRC", 0, 2);
-    headerBuffer.writeUInt32BE(2, 4);
+    headerBuffer.write(this.SIGNATURE, 0, 2);
+    headerBuffer.writeUInt32BE(this.VERSION, 4);
     headerBuffer.writeUInt32BE(this.entries.length, 8);
     return headerBuffer;
   };
