@@ -6,4 +6,4 @@ export const exists = async (filePath: string): Promise<boolean> => {
     () => true,
     () => false,
   );
-}
+};

@@ -1,37 +1,40 @@
-import { existsSync, readFileSync } from "node:fs";
+import { readFile } from "node:fs/promises";
 import { join } from "path";
 
 import { GIT_DIR } from "../constants.js";
 import { coloredLog } from "../functions/colored-log.js";
+import { exists } from "../functions/exists.js";
 import { Commit, CommitFieldType } from "../models/commit.js";
 
-const extractHeadHash = (): string | undefined => {
+const extractHeadHash = async (): Promise<string | undefined> => {
   const headPath = join(GIT_DIR, "HEAD");
 
-  if (!existsSync(headPath)) {
+  if (!(await exists(headPath))) {
     return;
   }
 
-  const headText = readFileSync(headPath).toString("utf-8");
+  const headText = await readFile(headPath).then((head) =>
+    head.toString("utf-8"),
+  );
 
   const refPrefix = "ref: ";
   //ブランチ名かコミットハッシュのどちらをHEADに持つかを識別して出し分ける
   if (headText.startsWith(refPrefix)) {
-    return readFileSync(
+    return await readFile(
       join(GIT_DIR, headText.slice(refPrefix.length)).trim(),
       "utf-8",
-    ).trim();
+    ).then((path) => path.trim());
   } else {
     return headText.trim();
   }
 };
 
-const getCommitHistory = (
+const getCommitHistory = async (
   hash: string,
   history: Array<CommitFieldType> = [],
-): Array<CommitFieldType> => {
+): Promise<Array<CommitFieldType>> => {
   const commit = new Commit();
-  commit.setCommit(hash);
+  await commit.setCommit(hash);
   const commitData = commit.getCommit();
 
   const currentHistory = [...history, commitData];
@@ -57,15 +60,15 @@ export const displayCommitHistory = (
   });
 };
 
-export const log = (_options?: Array<string>): void => {
-  const headHash = extractHeadHash();
+export const log = async (_options?: Array<string>): Promise<void> => {
+  const headHash = await extractHeadHash();
 
   if (!headHash) {
     console.log("there is no commit.");
     return;
   }
 
-  const commitHistory = getCommitHistory(headHash);
+  const commitHistory = await getCommitHistory(headHash);
 
   displayCommitHistory(commitHistory);
 };

@@ -1,13 +1,14 @@
 import { createHash } from "node:crypto";
-import { existsSync, mkdirSync, writeFileSync } from "node:fs";
+import { mkdir, writeFile } from "node:fs/promises";
 import { deflateSync } from "node:zlib";
 
+import { exists } from "../functions/exists.js";
 import { generateObjectPath } from "../functions/generate-object-path.js";
 
 export class BlobObject {
   constructor(private readonly content: Buffer) {}
 
-  public dumpBlobObject = (): void => {
+  public dumpBlobObject = async (): Promise<void> => {
     const header = Buffer.from(`blob ${this.content.length.toString()}\x00`);
     const store = Buffer.concat([
       Uint8Array.from(header),
@@ -22,10 +23,10 @@ export class BlobObject {
     const { dirPath, filePath } = generateObjectPath(hash);
     const compressedBlobObject = deflateSync(Uint8Array.from(store));
 
-    if (existsSync(filePath)) return;
+    if (await exists(filePath)) return;
 
-    if (!existsSync(dirPath)) mkdirSync(dirPath);
+    if (!(await exists(dirPath))) await mkdir(dirPath);
 
-    writeFileSync(filePath, Uint8Array.from(compressedBlobObject));
+    await writeFile(filePath, Uint8Array.from(compressedBlobObject));
   };
 }
