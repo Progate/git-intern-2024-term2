@@ -8,19 +8,24 @@ export class BlobObject {
   constructor(private readonly content: Buffer) {}
 
   public dumpBlobObject = (): void => {
-    const store = `blob ${this.content.length.toString()}\x00${this.content.toString()}`;
+    const header = Buffer.from(`blob ${this.content.length.toString()}\x00`);
+    const store = Buffer.concat([
+      Uint8Array.from(header),
+      Uint8Array.from(this.content),
+    ]);
+
     //16進数表示のため，hexに変換
-    const hash = createHash("sha1").update(store).digest("hex");
+    const hash = createHash("sha1")
+      .update(Uint8Array.from(store))
+      .digest("hex");
 
     const { dirPath, filePath } = generateObjectPath(hash);
-    const compressedBlobObject = deflateSync(
-      new Uint8Array(Buffer.from(store)),
-    );
+    const compressedBlobObject = deflateSync(Uint8Array.from(store));
 
     if (existsSync(filePath)) return;
 
     if (!existsSync(dirPath)) mkdirSync(dirPath);
 
-    writeFileSync(filePath, new Uint8Array(compressedBlobObject));
+    writeFileSync(filePath, Uint8Array.from(compressedBlobObject));
   };
 }
