@@ -6,17 +6,17 @@ import { deflateSync } from "node:zlib";
 import { GIT_OBJECTS } from "../constants.js";
 import { coloredLog } from "../functions/colored-log.js";
 
-export class Blob {
+export class BlobObject {
   content?: Buffer;
 
   public setContent = (content: Buffer): void => {
     this.content = content;
   };
 
-  public dumpBlob = (): void => {
+  public dumpBlobObject = (): void => {
     if (!this.content) {
       coloredLog({
-        text: "error in generating blob object.",
+        text: "error in generating Blob object.",
         color: "red",
       });
       return;
@@ -28,11 +28,11 @@ export class Blob {
 
     const dirPath = join(GIT_OBJECTS, hash.slice(0, 2));
     const filePath = join(GIT_OBJECTS, hash.slice(0, 2), hash.slice(2));
-    const compressedBlob = deflateSync(new Uint8Array(Buffer.from(store)));
-
+    const compressedBlobObject = deflateSync(new Uint8Array(Buffer.from(store)));
+    
     if (existsSync(dirPath)) return;
 
     mkdirSync(dirPath);
-    writeFileSync(filePath, new Uint8Array(compressedBlob));
+    writeFileSync(filePath, new Uint8Array(compressedBlobObject));
   };
 }

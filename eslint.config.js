@@ -56,6 +56,7 @@ export default [
           ],
         },
       ],
+      "no-unused-vars": ["error", { "argsIgnorePattern": "^_$" }]
     },
   }),
   {
