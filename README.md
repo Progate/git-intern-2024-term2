@@ -40,6 +40,11 @@ npm run lint:fix
 # run the formatter
 npm run format:check
 npm run format:fix
+
+# run all check or fix
+npm run check
+npm run fix
+
 ```
 
 ## publish the package
