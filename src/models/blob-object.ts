@@ -8,7 +8,7 @@ import { generateObjectPath } from "../functions/generate-object-path.js";
 export class BlobObject {
   constructor(private readonly content: Buffer) {}
 
-  public dumpBlobObject = async (): Promise<void> => {
+  public dumpBlobObject = async (): Promise<string | undefined> => {
     const header = Buffer.from(`blob ${this.content.length.toString()}\x00`);
     const store = Buffer.concat([
       Uint8Array.from(header),
@@ -28,5 +28,7 @@ export class BlobObject {
     if (!(await exists(dirPath))) await mkdir(dirPath);
 
     await writeFile(filePath, Uint8Array.from(compressedBlobObject));
+
+    return hash
   };
 }

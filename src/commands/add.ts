@@ -2,6 +2,8 @@ import { readFile } from "node:fs/promises";
 
 import { coloredLog } from "../functions/colored-log.js";
 import { BlobObject } from "../models/blob-object.js";
+import { GitIndex } from "../models/git-index.js";
+import { GIT_INDEX } from "../constants.js";
 
 export const add = async (options: Array<string>): Promise<void> => {
   const filePath = options[0];
@@ -19,5 +21,16 @@ export const add = async (options: Array<string>): Promise<void> => {
   const content = await readFile(filePath);
 
   const blobObject = new BlobObject(content);
-  await blobObject.dumpBlobObject();
+  const hash = await blobObject.dumpBlobObject();
+
+  if(!hash) {
+    console.log('Nothing has changed.')
+    return;
+  }
+
+  const gitIndex = new GitIndex(GIT_INDEX);
+  await gitIndex.initialize();
+  await gitIndex.pushEntry(filePath, hash);
+  await gitIndex.dumpIndex();
+
 };
