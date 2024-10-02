@@ -28,8 +28,10 @@ export class BlobObject {
 
     const dirPath = join(GIT_OBJECTS, hash.slice(0, 2));
     const filePath = join(GIT_OBJECTS, hash.slice(0, 2), hash.slice(2));
-    const compressedBlobObject = deflateSync(new Uint8Array(Buffer.from(store)));
-    
+    const compressedBlobObject = deflateSync(
+      new Uint8Array(Buffer.from(store)),
+    );
+
     if (existsSync(dirPath)) return;
 
     mkdirSync(dirPath);

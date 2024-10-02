@@ -36,7 +36,13 @@ export default [
           allowExpressions: true,
         },
       ],
-      "@typescript-eslint/no-unused-vars": "error",
+      "@typescript-eslint/no-unused-vars": [
+        "warn",
+        {
+          argsIgnorePattern: "^_",
+          varsIgnorePattern: "^_",
+        },
+      ],
       "@typescript-eslint/array-type": [
         "error",
         {
@@ -56,12 +62,15 @@ export default [
           ],
         },
       ],
-      "no-unused-vars": ["error", { "argsIgnorePattern": "^_$" }]
     },
   }),
   {
     files: ["**/*.js", "**/*.mjs"],
     ...eslint.configs.recommended,
+    //追加でルールを指定
+    rules: {
+      "no-unused-vars": ["error", { argsIgnorePattern: "^_.*$" }],
+    },
     languageOptions: {
       sourceType: "module",
       globals: {

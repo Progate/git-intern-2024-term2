@@ -16,8 +16,8 @@ export const mygit = async (argv: Array<string>): Promise<void> => {
 
   if (runCommand) {
     const options = argv.slice(3);
-    
-    runCommand(options)
+
+    runCommand(options);
   } else {
     console.log(`mygit: '${command}' is not a valid mygit command.\n`);
     validCommand.help();
