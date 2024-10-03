@@ -69,7 +69,7 @@ export class GitIndex {
     const indexBuffer = Buffer.concat([
       Uint8Array.from(headerBuffer),
       Uint8Array.from(entriesBuffer),
-      Uint8Array.from(checkSumBuffer)
+      // Uint8Array.from(checkSumBuffer)
     ]);
 
     await writeFile(this.gitIndexPath, Uint8Array.from(indexBuffer));
@@ -81,7 +81,10 @@ export class GitIndex {
     if (!await exists(this.gitIndexPath)) return;
 
     const buffer= await readFile(this.gitIndexPath);
+    const header = buffer.subarray(0, 12);
+    console.log(header.toString('hex'));
     const entryCount = buffer.readUInt32BE(8);
+    
 
     let offset = 12;
     for (let i = 0; i < entryCount; i++) {
@@ -170,7 +173,7 @@ export class GitIndex {
 
     entryBuffer.write(entry.filePath, offset, entry.length);
 
-    console.log(entryBuffer);
+    console.log(entryBuffer.subarray(10, 70));
     
 
     return entryBuffer;
