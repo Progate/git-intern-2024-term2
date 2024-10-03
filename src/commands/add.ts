@@ -2,6 +2,7 @@ import { readFile } from "node:fs/promises";
 
 import { GIT_INDEX } from "../constants.js";
 import { coloredLog } from "../functions/colored-log.js";
+import { exists } from "../functions/exists.js";
 import { BlobObject } from "../models/blob-object.js";
 import { GitIndex } from "../models/git-index.js";
 
@@ -14,6 +15,15 @@ export const add = async (options: Array<string>): Promise<void> => {
     coloredLog({
       text: "hint: Maybe you wanted to say 'git add XXX'?",
       color: "yellow",
+    });
+    return;
+  }
+
+  //ファイルが存在しなかった場合の処理
+  if (!(await exists(filePath))) {
+    coloredLog({
+      text: `fatal: pathspec '${filePath}' did not match any files`,
+      color: "red",
     });
     return;
   }
