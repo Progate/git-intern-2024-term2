@@ -40,8 +40,24 @@ export class GitIndex {
     return this.entries.map((entry) => entry.filePath);
   };
 
+  public checkDuplicate = (filePath: string, hash: string): boolean => {
+    return this.entries.some(
+      (entry) => entry.filePath === filePath && entry.hash === hash,
+    );
+  };
+
+  private deleteDuplicate = (filePath: string): void => {
+    const index = this.entries.findIndex(
+      (entry) => entry.filePath === filePath,
+    );
+    if (index !== -1) this.entries.splice(index, 1);
+  };
+
   public pushEntry = async (filePath: string, hash: string): Promise<void> => {
     const fileStat = await stat(filePath);
+
+    //同じファイルパスのentryは重複を防ぐために削除しておく
+    this.deleteDuplicate(filePath);
 
     // https://nodejs.org/api/fs.html#class-fsstats
     const entry: Entry = {

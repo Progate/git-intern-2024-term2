@@ -44,13 +44,14 @@ export const add = async (options: Array<string>): Promise<void> => {
   const blobObject = new BlobObject(content);
   const hash = await blobObject.dumpBlobObject();
 
-  if (!hash) {
+  const gitIndex = new GitIndex(GIT_INDEX);
+  await gitIndex.initialize();
+
+  if (gitIndex.checkDuplicate(filePath, hash)) {
     console.log("Nothing has changed.");
     return;
   }
 
-  const gitIndex = new GitIndex(GIT_INDEX);
-  await gitIndex.initialize();
   await gitIndex.pushEntry(filePath, hash);
   await gitIndex.dumpIndex();
 };

@@ -3,12 +3,12 @@ import { mkdir, writeFile } from "node:fs/promises";
 import { deflateSync } from "node:zlib";
 
 import { exists } from "../functions/exists.js";
-import { generateObjectPath } from "../functions/generate-object-path.js";
+import { generateObjectPath } from "../functions/path.js";
 
 export class BlobObject {
   constructor(private readonly content: Buffer) {}
 
-  public dumpBlobObject = async (): Promise<string | undefined> => {
+  public dumpBlobObject = async (): Promise<string> => {
     const header = Buffer.from(`blob ${this.content.length.toString()}\x00`);
     const store = Buffer.concat([
       Uint8Array.from(header),
@@ -23,7 +23,7 @@ export class BlobObject {
     const { dirPath, filePath } = generateObjectPath(hash);
     const compressedBlobObject = deflateSync(Uint8Array.from(store));
 
-    if (await exists(filePath)) return;
+    if (await exists(filePath)) return hash;
 
     if (!(await exists(dirPath))) await mkdir(dirPath);
 
