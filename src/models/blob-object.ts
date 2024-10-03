@@ -29,6 +29,6 @@ export class BlobObject {
 
     await writeFile(filePath, Uint8Array.from(compressedBlobObject));
 
-    return hash
+    return hash;
   };
 }

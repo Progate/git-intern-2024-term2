@@ -61,15 +61,17 @@ export class GitIndex {
 
   public dumpIndex = async (): Promise<Array<string>> => {
     const headerBuffer = this.createHeaderBuffer();
-    console.log(this.entries);
-    
+
     const entriesBuffer = this.createEntriesBuffer();
-    const checkSumBuffer = this.createCheckSumBuffer(headerBuffer, entriesBuffer);
+    const checkSumBuffer = this.createCheckSumBuffer(
+      headerBuffer,
+      entriesBuffer,
+    );
 
     const indexBuffer = Buffer.concat([
       Uint8Array.from(headerBuffer),
       Uint8Array.from(entriesBuffer),
-      // Uint8Array.from(checkSumBuffer)
+      Uint8Array.from(checkSumBuffer),
     ]);
 
     await writeFile(this.gitIndexPath, Uint8Array.from(indexBuffer));
@@ -78,13 +80,10 @@ export class GitIndex {
   };
 
   private parseEntries = async (): Promise<void> => {
-    if (!await exists(this.gitIndexPath)) return;
+    if (!(await exists(this.gitIndexPath))) return;
 
-    const buffer= await readFile(this.gitIndexPath);
-    const header = buffer.subarray(0, 12);
-    console.log(header.toString('hex'));
+    const buffer = await readFile(this.gitIndexPath);
     const entryCount = buffer.readUInt32BE(8);
-    
 
     let offset = 12;
     for (let i = 0; i < entryCount; i++) {
@@ -92,7 +91,7 @@ export class GitIndex {
 
       const currentOffset = offset + 62 + entry.length;
       offset = currentOffset + 8 - ((currentOffset - 12) % 8);
-      
+
       this.entries.push(entry);
     }
   };
@@ -111,17 +110,29 @@ export class GitIndex {
       size: buffer.readUInt32BE(offset + 36),
       hash: buffer.subarray(offset + 40, offset + 60).toString("hex"),
       length: buffer.readUInt16BE(offset + 60),
-      filePath: buffer.subarray(offset + 62, offset + 62 + buffer.readUInt16BE(offset + 60)).toString("utf8"),
+      filePath: buffer
+        .subarray(offset + 62, offset + 62 + buffer.readUInt16BE(offset + 60))
+        .toString("utf8"),
     };
 
-    return entry
-  }
+    return entry;
+  };
 
-  private createCheckSumBuffer = (headerBuffer: Buffer, entriesBuffer: Buffer): Buffer => {
+  private createCheckSumBuffer = (
+    headerBuffer: Buffer,
+    entriesBuffer: Buffer,
+  ): Buffer => {
     const hash = createHash("sha1")
-      .update(Uint8Array.from(Buffer.concat([Uint8Array.from(headerBuffer), Uint8Array.from(entriesBuffer)])))
+      .update(
+        Uint8Array.from(
+          Buffer.concat([
+            Uint8Array.from(headerBuffer),
+            Uint8Array.from(entriesBuffer),
+          ]),
+        ),
+      )
       .digest("hex");
-    return Buffer.from(hash);
+    return Buffer.from(hash, "hex");
   };
 
   private createHeaderBuffer = (): Buffer => {
@@ -130,7 +141,7 @@ export class GitIndex {
     headerBuffer.write(this.SIGNATURE, 0, 4);
     headerBuffer.writeUInt32BE(this.VERSION, 4);
     headerBuffer.writeUInt32BE(this.entries.length, 8);
-    
+
     return headerBuffer;
   };
 
@@ -142,7 +153,7 @@ export class GitIndex {
       buffers.push(entryBuffer);
     }
 
-    return Buffer.concat(buffers.map(buffer => Uint8Array.from(buffer)));
+    return Buffer.concat(buffers.map((buffer) => Uint8Array.from(buffer)));
   };
 
   private createEntryBuffer = (entry: Entry): Buffer => {
@@ -172,9 +183,6 @@ export class GitIndex {
     offset += 2;
 
     entryBuffer.write(entry.filePath, offset, entry.length);
-
-    console.log(entryBuffer.subarray(10, 70));
-    
 
     return entryBuffer;
   };
