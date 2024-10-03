@@ -1,4 +1,4 @@
-import crypto from "crypto";
+import { createHash } from "crypto";
 import { mkdir, writeFile } from "node:fs/promises";
 import { deflateSync } from "zlib";
 
@@ -88,8 +88,10 @@ export class TreeObject {
     const buffers: Array<Buffer> = [];
 
     for (const entry of entries) {
-      const entryContent = `${entry.mode} ${entry.name}\0${entry.hash}`;
-      buffers.push(Buffer.from(entryContent));
+      buffers.push(
+        Buffer.from(`${entry.mode} ${entry.name}\0`),
+        Buffer.from(entry.hash, "hex"),
+      );
     }
 
     const contentBuffer = Buffer.concat(
@@ -103,10 +105,7 @@ export class TreeObject {
       Uint8Array.from(contentBuffer),
     ]);
 
-    return crypto
-      .createHash("sha1")
-      .update(Uint8Array.from(treeBuffer))
-      .digest("hex");
+    return createHash("sha1").update(Uint8Array.from(treeBuffer)).digest("hex");
   }
 
   private getTreeObject(path: string): Array<TreeEntry> | undefined {
@@ -137,8 +136,7 @@ export class TreeObject {
       Uint8Array.from(contentBuffer),
     ]);
 
-    const treeHash = crypto
-      .createHash("sha1")
+    const treeHash = createHash("sha1")
       .update(Uint8Array.from(treeBuffer))
       .digest("hex");
 
