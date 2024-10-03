@@ -36,6 +36,10 @@ export class GitIndex {
     this.entries = [];
   };
 
+  public getFilePaths = (): Array<string> => {
+    return this.entries.map((entry) => entry.filePath);
+  };
+
   public pushEntry = async (filePath: string, hash: string): Promise<void> => {
     const fileStat = await stat(filePath);
 
