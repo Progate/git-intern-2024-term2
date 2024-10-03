@@ -36,8 +36,16 @@ export class GitIndex {
     this.entries = [];
   };
 
-  public getFilePaths = (): Array<string> => {
-    return this.entries.map((entry) => entry.filePath);
+  public getFileData = (): Array<{
+    filePath: string;
+    hash: string;
+  }> => {
+    return this.entries.map((entry) => {
+      return {
+        filePath: entry.filePath,
+        hash: entry.hash,
+      };
+    });
   };
 
   public checkDuplicate = (filePath: string, hash: string): boolean => {

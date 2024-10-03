@@ -1,8 +1,10 @@
 import { add } from "./add.js";
+import { commit } from "./commit.js";
 import { log } from "./log.js";
 
 export const validCommand = {
   add: add,
+  commit: commit,
   log: log,
   help: () => {
     console.log("Available commands:");
