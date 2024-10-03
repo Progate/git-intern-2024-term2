@@ -61,7 +61,6 @@ export class GitIndex {
 
   public dumpIndex = async (): Promise<Array<string>> => {
     const headerBuffer = this.createHeaderBuffer();
-
     const entriesBuffer = this.createEntriesBuffer();
     const checkSumBuffer = this.createCheckSumBuffer(
       headerBuffer,
@@ -132,6 +131,9 @@ export class GitIndex {
         ),
       )
       .digest("hex");
+
+    //明示的にencodingを指定しないとデフォルトでutf-8になってしまう
+    // https://nodejs.org/api/buffer.html#static-method-bufferfromstring-encoding
     return Buffer.from(hash, "hex");
   };
 

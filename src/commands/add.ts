@@ -18,6 +18,7 @@ export const add = async (options: Array<string>): Promise<void> => {
     return;
   }
 
+  // TODO: ディレクトリを指定した際などに複数回pushEntryする
   const content = await readFile(filePath);
 
   const blobObject = new BlobObject(content);
