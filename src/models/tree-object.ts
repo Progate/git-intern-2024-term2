@@ -1,5 +1,6 @@
 import { createHash } from "crypto";
 import { mkdir, writeFile } from "node:fs/promises";
+import { join } from "node:path";
 import { deflateSync } from "zlib";
 
 import { exists } from "../functions/exists.js";
@@ -28,6 +29,22 @@ export class TreeObject {
   constructor(fileData: Array<FileData>) {
     this.buildFileSystem(fileData);
     this.createTreeObjects();
+  }
+
+  public async dumpAllTrees(path = ""): Promise<string | undefined> {
+    const entries = this.getTreeObject(path);
+    if (!entries || entries.length === 0) return;
+
+    const hash = await this.dumpTree(path);
+
+    for (const entry of entries) {
+      if (entry.type === "tree") {
+        const subPath = path ? join(path, entry.name) : entry.name;
+        await this.dumpAllTrees(subPath);
+      }
+    }
+
+    return hash;
   }
 
   //ファイルパスとハッシュからファイル構造を構築
@@ -85,25 +102,7 @@ export class TreeObject {
   }
 
   private createTreeHash(entries: Array<TreeEntry>): string {
-    const buffers: Array<Buffer> = [];
-
-    for (const entry of entries) {
-      buffers.push(
-        Buffer.from(`${entry.mode} ${entry.name}\0`),
-        Buffer.from(entry.hash, "hex"),
-      );
-    }
-
-    const contentBuffer = Buffer.concat(
-      buffers.map((buffer) => Uint8Array.from(buffer)),
-    );
-    const headerBuffer = Buffer.from(
-      `tree ${contentBuffer.length.toString()}\0`,
-    );
-    const treeBuffer = Buffer.concat([
-      Uint8Array.from(headerBuffer),
-      Uint8Array.from(contentBuffer),
-    ]);
+    const treeBuffer = this.createBufferFromEntries(entries);
 
     return createHash("sha1").update(Uint8Array.from(treeBuffer)).digest("hex");
   }
@@ -112,10 +111,7 @@ export class TreeObject {
     return this.treeObjects.get(path);
   }
 
-  private async dumpTree(path = ""): Promise<string | undefined> {
-    const entries = this.getTreeObject(path);
-    if (!entries) return;
-
+  private createBufferFromEntries = (entries: Array<TreeEntry>): Buffer => {
     const buffers: Array<Buffer> = [];
 
     for (const entry of entries) {
@@ -135,6 +131,15 @@ export class TreeObject {
       Uint8Array.from(headerBuffer),
       Uint8Array.from(contentBuffer),
     ]);
+
+    return treeBuffer;
+  };
+
+  private async dumpTree(path = ""): Promise<string | undefined> {
+    const entries = this.getTreeObject(path);
+    if (!entries) return;
+
+    const treeBuffer = this.createBufferFromEntries(entries);
 
     const treeHash = createHash("sha1")
       .update(Uint8Array.from(treeBuffer))
@@ -148,21 +153,5 @@ export class TreeObject {
     await writeFile(filePath, Uint8Array.from(compressedContent));
 
     if (path === "") return treeHash;
-  }
-
-  public async dumpAllTrees(path = ""): Promise<string | undefined> {
-    const entries = this.getTreeObject(path);
-    if (!entries || entries.length === 0) return;
-
-    const hash = await this.dumpTree(path);
-
-    for (const entry of entries) {
-      if (entry.type === "tree") {
-        const subPath = path ? `${path}/${entry.name}` : entry.name;
-        await this.dumpAllTrees(subPath);
-      }
-    }
-
-    return hash;
   }
 }
