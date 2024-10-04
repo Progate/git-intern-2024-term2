@@ -1,40 +1,13 @@
-import { readFile } from "node:fs/promises";
-import { join } from "path";
-
-import { GIT_DIR } from "../constants.js";
 import { coloredLog } from "../functions/colored-log.js";
-import { exists } from "../functions/exists.js";
+import { extractHeadHash } from "../functions/extract-head-hash.js";
 import { Commit, CommitFieldType } from "../models/commit.js";
-
-const extractHeadHash = async (): Promise<string | undefined> => {
-  const headPath = join(GIT_DIR, "HEAD");
-
-  if (!(await exists(headPath))) {
-    return;
-  }
-
-  const headText = await readFile(headPath).then((head) =>
-    head.toString("utf-8"),
-  );
-
-  const refPrefix = "ref: ";
-  //ブランチ名かコミットハッシュのどちらをHEADに持つかを識別して出し分ける
-  if (headText.startsWith(refPrefix)) {
-    return await readFile(
-      join(GIT_DIR, headText.slice(refPrefix.length)).trim(),
-      "utf-8",
-    ).then((path) => path.trim());
-  } else {
-    return headText.trim();
-  }
-};
 
 const getCommitHistory = async (
   hash: string,
   history: Array<CommitFieldType> = [],
 ): Promise<Array<CommitFieldType>> => {
   const commit = new Commit();
-  await commit.setCommit(hash);
+  await commit.setCommitHash(hash);
   const commitData = commit.getCommit();
 
   const currentHistory = [...history, commitData];
@@ -54,8 +27,7 @@ export const displayCommitHistory = (
       text: `commit: ${commit.hash}`,
       color: "yellow",
     });
-    console.log(`Author: ${commit.author}`);
-    console.log(`Committer: ${commit.committer}\n`);
+    console.log(`author: ${commit.author}\n`);
     console.log(`  ${commit.message}\n`);
   });
 };
