@@ -12,4 +12,8 @@ export const COMMIT_OPTIONS = [
     name: "-m",
     description: "commit message",
   },
+  {
+    name: "-am",
+    description: "add all files and commit message",
+  },
 ];
