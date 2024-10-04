@@ -36,8 +36,8 @@ export const commit = async (options: Array<string>): Promise<void> => {
   }
 
   //optionが -amだった場合は全てのファイルをaddする
-  if(option === '-am') {
-    await add(['.'])
+  if (option === "-am") {
+    await add(["."]);
   }
 
   //indexからファイルパスとblobオブジェクトのhashを取得
