@@ -7,6 +7,7 @@ import { extractHeadHash } from "../functions/extract-head-hash.js";
 import { Commit } from "../models/commit.js";
 import { GitIndex } from "../models/git-index.js";
 import { TreeObject } from "../models/tree-object.js";
+import { add } from "./add.js";
 
 export const commit = async (options: Array<string>): Promise<void> => {
   //ファイル名指定でコミットはできない仕様とする
@@ -32,6 +33,11 @@ export const commit = async (options: Array<string>): Promise<void> => {
     COMMIT_OPTIONS.forEach((option) => {
       console.log(` ${option.name}   ${option.description}\n`);
     });
+  }
+
+  //optionが -amだった場合は全てのファイルをaddする
+  if(option === '-am') {
+    await add(['.'])
   }
 
   //indexからファイルパスとblobオブジェクトのhashを取得
